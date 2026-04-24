@@ -6,6 +6,7 @@ The `homeassistant-entity-renamer.py` script provides the following functionalit
 
 - List entities: You can retrieve a list of entities in HomeAssistant and display their friendly names and entity IDs. You can optionally filter entities using a regular expression.
 - Rename entities: You can rename entities by specifying a search regular expression and a replace regular expression (see pythons [re.sub()](https://docs.python.org/3/library/re.html#re.sub)). The script will display a table with the current entity IDs, new entity IDs, and friendly names. It will ask for confirmation before renaming the entities.
+- Update references: When entities are renamed, the script also updates exact entity ID references it finds in Home Assistant automations, scripts, scenes, and storage-based dashboards before finishing the operation.
 - Preserves the history of renamed entities since it uses the same code path for renaming as the HomeAssistant UI (which preserves history since the release 2022.4). See [this websocket callback](https://github.com/home-assistant/core/blob/2023.7.2/homeassistant/components/config/entity_registry.py#L147).
 
 
@@ -32,6 +33,12 @@ Tested on HomeAssistant 2023.7.2.
    ```
 
    Replace `<search_regex>` with the regular expression that matches the entities you want to rename. Replace `<replace_regex>` with the regular expression used to rename the entities. Note that you can use all the regex magic that Python's `re.sub()` function allows.
+
+   By default, reference updates are included. If you only want to rename the entity IDs themselves, add:
+
+   ```
+   --skip-reference-updates
+   ```
 
 4. Check the output and confirm the renaming process if desired.
 
@@ -85,6 +92,17 @@ Entity 'input_number.interesting_testnumber_1' renamed to 'input_number.just_ano
 Entity 'input_text.interesting_testtext_1' renamed to 'input_text.just_another_text' successfully!
 
 ```
+
+## Reference update scope
+
+Automatic reference updates currently cover:
+
+- Automations
+- Scripts
+- Scenes
+- Storage-based dashboards
+
+The script only replaces exact entity ID matches inside those configs. YAML-only dashboards and group helpers are not updated automatically.
 
 ## Acknowledgements
 
